@@ -17,6 +17,9 @@ class threadCamera:
         self.captura.set(cv2.CAP_PROP_FRAME_WIDTH, self.cap_largura)
         self.captura.set(cv2.CAP_PROP_FRAME_HEIGHT, self.cap_altura)
 
+        #self.captura.release()   
+
+    def executar_thread(self):
         while self.rodando:
             verificacao, frame = self.captura.read()
             if not verificacao:
@@ -31,8 +34,6 @@ class threadCamera:
             # Verificação importante: se a interface não tiver consumido o frame anterior, vai descartar o novo ao invés de esperar, evita atraso na imagem
             if not self.fila_frame.full():
                 self.fila_frame.put(frame)
-
-        self.captura.release()   
 
     def atualizar_frame(self):
         try:
