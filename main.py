@@ -12,5 +12,71 @@ captura = None
 # Vai indicar se as threads estão funcionando
 rodando = True
 
+class Interface():
+    def __init__(self):
 
+        # Inicializa o DPG
+        dpg.create_context()
 
+        # Tamanho da textura da câmera
+        self.CAM_W, self.CAM_H = 640,480
+
+        # A textura precisa existir antes da janela, por isso é criada aqui. Essa variável é uma lista de zeros que preenche a textura com preto
+        self.dados_iniciais = [0.0] * (self.CAM_W * self.CAM_H * 4)
+
+        # Gerenciador de texturas
+        with dpg.texture_registry():
+            
+            # Cria uma textura que pode ser atualizada dinâmicamente (video)
+            dpg.add_dynamic_texture(
+                width=self.CAM_W,
+                height=self.CAM_H,
+                default_value=self.dados_iniciais, # Conteúdo inicial da textura
+                tag="textura_camera" # ID da textura
+            )
+
+        # Interface gráfica:
+        self._criar_janela()
+
+        while dpg.is_dearpygui_running():
+            dpg.render_dearpygui_frame()
+
+    def _criar_janela(self):
+        # "window" é um painel flutuante. Tudo que estiver abaixo do with dele, pertence à esse painel
+        with dpg.window(label="Controle-O", tag="janela_principal"):
+            
+            # Group é semelhante à uma DIV do HTML. É um container de widgets
+            with dpg.group():
+
+                # Vai adicionar a câmera na tela
+                dpg.add_image("textura_camera", width=self.CAM_W, height=self.CAM_H)
+                dpg.add_spacer(height=16)
+
+                # O parâmetro "horizontal" serve pros widgets ficarem posicionados na horizontal, já quê, por padrão, eles ficam posicionados na vertical
+                with dpg.group(horizontal=True):
+
+                    dpg.add_button(
+                        label="TESTE",
+                        callback=self._btn, # Vai chamar a função atribuída ao botão quando clicado
+                        width=220,
+                        height=44
+                    )
+
+        # Viewport é a janela do sistema operacional, que vai ser preenchida com a "window" do DPG
+        dpg.create_viewport(
+            title="Controle-O",
+            width= self.CAM_W + 60, # Tamanho horizontal da janela
+            height= self.CAM_H + 90, # Tamanho vertical da janela
+            resizable= False # Vai tirar o redimensionamento da janela (Vou ativar se algum momento eu quiser adicionar responsividade ao projeto)
+        )
+        dpg.setup_dearpygui() # Vai processar tudo que foi criado antes de abrir a janela
+        dpg.show_viewport() # Vai mostrar
+        dpg.set_primary_window("janela_principal", True) # Vai setar a janela principal 
+
+    def _t_camera(self):
+        ...
+
+    def _btn(self):
+        print("TESTE")            
+
+app = Interface()
