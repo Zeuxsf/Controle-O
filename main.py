@@ -3,17 +3,18 @@ import cv2
 import numpy as np
 import threading
 import queue
+import subprocess
 from camera import threadCamera
 
 # Canal de comunicação entre as threads. Só segura 1 frame. Se tiver algum frame esperando, ele descarta o novo ao invés de acumular
 fila_frame = queue.Queue(maxsize=1)
-# Vai dizer se a câmera está capturando ou não
-captura = None
-# Vai indicar se as threads estão funcionando
-rodando = True
 
 class Interface():
     def __init__(self):
+
+        global fila_frame
+        # Thread da camera
+        self.camera = threadCamera(fila_frame) 
 
         # Inicializa o DPG
         dpg.create_context()
@@ -38,9 +39,14 @@ class Interface():
         # Interface gráfica:
         self._criar_janela()
 
+        # Camera
+        self._t_camera()
+
         while dpg.is_dearpygui_running():
+            self.camera.atualizar_frame()
             dpg.render_dearpygui_frame()
 
+    # Vai criar a janela e todos os elementos dentro dela
     def _criar_janela(self):
         # "window" é um painel flutuante. Tudo que estiver abaixo do with dele, pertence à esse painel
         with dpg.window(label="Controle-O", tag="janela_principal"):
@@ -56,8 +62,8 @@ class Interface():
                 with dpg.group(horizontal=True):
 
                     dpg.add_button(
-                        label="TESTE",
-                        callback=self._btn, # Vai chamar a função atribuída ao botão quando clicado
+                        label="Aplicar Filtro",
+                        callback=self._aplicar_filtro, # Vai chamar a função atribuída ao botão quando clicado
                         width=220,
                         height=44
                     )
@@ -65,7 +71,7 @@ class Interface():
         # Viewport é a janela do sistema operacional, que vai ser preenchida com a "window" do DPG
         dpg.create_viewport(
             title="Controle-O",
-            width= self.CAM_W + 60, # Tamanho horizontal da janela
+            width= self.CAM_W + 16, # Tamanho horizontal da janela
             height= self.CAM_H + 90, # Tamanho vertical da janela
             resizable= False # Vai tirar o redimensionamento da janela (Vou ativar se algum momento eu quiser adicionar responsividade ao projeto)
         )
@@ -73,10 +79,14 @@ class Interface():
         dpg.show_viewport() # Vai mostrar
         dpg.set_primary_window("janela_principal", True) # Vai setar a janela principal 
 
+    # Inicia thread da camera
     def _t_camera(self):
-        ...
+        t = threading.Thread(target=self.camera.executar_thread, daemon=True) # O daemon diz pro sistema que essa thread é descartável, ou seja, não fica segurando o programa aberto caso a thread ainda não tenha terminado e você precisa fechar
+        
+        t.start() 
 
-    def _btn(self):
-        print("TESTE")            
+    # Vai aplicar filtro na webcam (problema pessoal, remova caso não for útil para o seu uso)
+    def _aplicar_filtro(self):
+        subprocess.Popen(["bash","webcam.sh"])            
 
 app = Interface()
