@@ -3,6 +3,7 @@ import numpy as np
 import threading
 import queue
 import dearpygui.dearpygui as dpg
+from hands import DetectarMaos
 
 class threadCamera:
     def __init__(self, fila_frame, captura=None, rodando=True, cap_largura=640, cap_altura=480):
@@ -11,6 +12,7 @@ class threadCamera:
         self.rodando = rodando
         self.cap_largura = cap_largura
         self.cap_altura = cap_altura
+        self.detector = DetectarMaos()
 
         # Definindo as proporções do video
         self.captura = cv2.VideoCapture(0)
@@ -28,6 +30,10 @@ class threadCamera:
             
             # Espelhar imagem
             frame = cv2.flip(frame,1)
+            
+            # Módulo do mediapipe para a detecção de mãos
+            frame = self.detector.encontrar_maos(frame)
+
             # Converter as cores da imagem para RGBA (A interface DPG usa esse formato)
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
 
