@@ -16,7 +16,7 @@ class DetectarMaos:
         self.maos = self.maos_mp.Hands(
             self.modo,
             self.max_maos,
-            1,
+            0,
             self.deteccao_confianca,
             self.rastreio_confianca
         )

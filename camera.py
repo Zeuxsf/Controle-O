@@ -3,7 +3,7 @@ import numpy as np
 import threading
 import queue
 import dearpygui.dearpygui as dpg
-from hands import DetectarMaos
+from maos import DetectarMaos
 
 class threadCamera:
     def __init__(self, fila_frame, captura=None, rodando=True, cap_largura=640, cap_altura=480):
